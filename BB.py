@@ -142,7 +142,7 @@ def clear_order():
 # Create the main window
 root = tk.Tk()
 root.title("BIG Baguette Order System")
-root.geometry("600x1100")
+root.geometry("900x1100")
 root.configure(bg='black')
 
 # Create frames
