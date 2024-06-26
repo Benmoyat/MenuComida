@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 
+
 # Precios de cada artículo
 precios = {
     "Hot-Dog Regular": 2.50,
@@ -231,5 +232,3 @@ for marco in [marco_principal, marco_hotdog, marco_hamburguesa, marco_papas, mar
 # Elevar el marco principal al inicio
 marco_principal.tkraise()
 
-# Ejecutar la aplicación
-root.mainloop()
