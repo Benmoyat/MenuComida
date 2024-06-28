@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 
-
 # Precios de cada artículo
 precios = {
     "Hot-Dog Regular": 2.50,
@@ -16,7 +15,8 @@ precios = {
     "Papas Fritas de Camote": 3.00,
     "Cola": 1.50,
     "Jugo de Naranja": 2.00,
-    "Agua": 1.00
+    "Agua": 1.00,
+    "Extra": 500.00  # Precio del extra
 }
 
 # Datos del pedido y historial de pedidos
@@ -131,7 +131,28 @@ def crear_marco_categoria(categoria, items):
         
         boton_agregar = tk.Button(marco_item, text="Agregar", command=lambda i=item, q=var_cantidad: agregar_articulo(categoria, i, q, etiqueta_subtotal), bg='white', font=("Arial", 16))
         boton_agregar.pack(side='left', padx=5)
+
+    # Agregar opción "Extra" a la categoría
+    marco_extra = tk.Frame(marco, bg='black')
+    marco_extra.pack(pady=5)
     
+    etiqueta_extra = tk.Label(marco_extra, text="Extra", fg='white', bg='black', font=("Arial", 16))
+    etiqueta_extra.pack(side='left', padx=10)
+    
+    var_cantidad_extra = tk.StringVar(value="0")
+    
+    boton_disminuir_extra = tk.Button(marco_extra, text="-", command=lambda q=var_cantidad_extra: disminuir_cantidad(q), bg='white', font=("Arial", 16), width=2)
+    boton_disminuir_extra.pack(side='left', padx=5)
+    
+    entrada_cantidad_extra = tk.Label(marco_extra, textvariable=var_cantidad_extra, fg='white', bg='black', font=("Arial", 16), width=3)
+    entrada_cantidad_extra.pack(side='left', padx=5)
+    
+    boton_incrementar_extra = tk.Button(marco_extra, text="+", command=lambda q=var_cantidad_extra: incrementar_cantidad(q), bg='white', font=("Arial", 16), width=2)
+    boton_incrementar_extra.pack(side='left', padx=5)
+    
+    boton_agregar_extra = tk.Button(marco_extra, text="Agregar", command=lambda q=var_cantidad_extra: agregar_articulo(categoria, "Extra", q, etiqueta_subtotal), bg='white', font=("Arial", 16))
+    boton_agregar_extra.pack(side='left', padx=5)
+
     boton_limpiar_subtotal = tk.Button(marco, text="Limpiar Subtotal", command=lambda: limpiar_subtotal(categoria, etiqueta_subtotal), bg='red', font=("Arial", 16))
     boton_limpiar_subtotal.pack(pady=10)
     
@@ -180,7 +201,7 @@ marco_historial = tk.Frame(root, bg='black')
 # Agregar una imagen en la parte superior de la ventana
 try:
     imagen = Image.open("BB.png")  # Actualizar la ruta de la imagen
-    imagen = imagen.resize((1600, 150), Image.ANTIALIAS)
+    imagen = imagen.resize((1600, 150))
     foto = ImageTk.PhotoImage(imagen)
     # Agregar imagen al marco_principal
     etiqueta_imagen = tk.Label(marco_principal, image=foto, bg='black')
@@ -232,3 +253,6 @@ for marco in [marco_principal, marco_hotdog, marco_hamburguesa, marco_papas, mar
 # Elevar el marco principal al inicio
 marco_principal.tkraise()
 
+# Ejecutar la aplicación
+if __name__ == "__main__":
+    root.mainloop()
