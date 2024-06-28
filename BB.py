@@ -1,6 +1,10 @@
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
+import win32print
+import win32ui
+import win32con
+from PIL import ImageWin
 
 # Precios de cada artículo
 precios = {
@@ -47,6 +51,30 @@ def actualizar_subtotal(etiqueta_subtotal, categoria):
 def regresar_al_principal():
     marco_principal.tkraise()
 
+# Función para imprimir el pedido
+def imprimir_pedido(detalles_pedido):
+    printer_name = 'Brother DCP-T510W'  # Nombre exacto de la impresora
+    hDC = win32ui.CreateDC()
+    hDC.CreatePrinterDC(printer_name)
+    hDC.StartDoc("Pedido")
+    hDC.StartPage()
+
+    # Ajustar la fuente y tamaño del texto
+    hDC.SetMapMode(win32con.MM_TWIPS)
+    font = win32ui.CreateFont({
+        "name": "Arial",
+        "height": -150,  # Tamaño de la fuente
+        "weight": 400
+    })
+    hDC.SelectObject(font)
+
+    # Escribir el texto en la página
+    hDC.TextOut(100, -100, detalles_pedido)
+
+    hDC.EndPage()
+    hDC.EndDoc()
+    hDC.DeleteDC()
+
 # Función para enviar el pedido
 def enviar_pedido():
     nombre = entrada_nombre.get()
@@ -67,13 +95,17 @@ def enviar_pedido():
         return
     
     detalles_pedido = f"Nombre: {nombre}\nPedido: {', '.join(pedido)}\nTotal: ${total:.2f}"
-    messagebox.showinfo("Detalles del Pedido", detalles_pedido)
     
-    # Agregar el pedido al historial
-    historial_pedidos.append({"nombre": nombre, "pedido": pedido, "total": total})
-    
-    # Limpiar los datos del pedido actual
-    limpiar_pedido()
+    # Mostrar los detalles del pedido y preguntar si desea imprimir
+    if messagebox.askokcancel("Detalles del Pedido", detalles_pedido):
+        # Imprimir el pedido solo si se hace clic en "OK"
+        imprimir_pedido(detalles_pedido)
+        
+        # Agregar el pedido al historial
+        historial_pedidos.append({"nombre": nombre, "pedido": pedido, "total": total})
+        
+        # Limpiar los datos del pedido actual
+        limpiar_pedido()
 
 # Función para agregar artículos al pedido
 def agregar_articulo(categoria, item, var_cantidad, etiqueta_subtotal):
