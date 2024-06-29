@@ -4,7 +4,6 @@ from PIL import Image, ImageTk
 import win32print
 import win32ui
 import win32con
-from PIL import ImageWin
 
 # Precios de cada artículo
 precios = {
@@ -51,7 +50,7 @@ def actualizar_subtotal(etiqueta_subtotal, categoria):
 def regresar_al_principal():
     marco_principal.tkraise()
 
-# Función para imprimir el pedido
+# Función para imprimir el pedido con manejo de saltos de línea
 def imprimir_pedido(detalles_pedido):
     printer_name = 'Brother DCP-T510W'  # Nombre exacto de la impresora
     hDC = win32ui.CreateDC()
@@ -63,17 +62,47 @@ def imprimir_pedido(detalles_pedido):
     hDC.SetMapMode(win32con.MM_TWIPS)
     font = win32ui.CreateFont({
         "name": "Arial",
-        "height": -150,  # Tamaño de la fuente
+        "height": -360,  # Tamaño de la fuente 18 puntos en TWIPS
         "weight": 400
     })
     hDC.SelectObject(font)
 
-    # Escribir el texto en la página
-    hDC.TextOut(100, -100, detalles_pedido)
+    # Escribir el texto en la página con manejo de saltos de línea
+    margin_top = -100
+    margin_left = 100
+    line_height = 360  # Altura de la línea en TWIPS (equivalente al tamaño de la fuente)
+    max_width = 8000  # Ajusta este valor según el ancho de la página y la fuente
+
+    lines = dividir_texto_en_lineas(detalles_pedido, max_width, hDC)
+    y = margin_top
+    for line in lines:
+        hDC.TextOut(margin_left, y, line)
+        y -= line_height  # Mover hacia abajo para la siguiente línea
 
     hDC.EndPage()
     hDC.EndDoc()
     hDC.DeleteDC()
+
+# Función para dividir el texto en líneas según el ancho máximo
+def dividir_texto_en_lineas(texto, max_width, hDC):
+    palabras = texto.split()
+    lineas = []
+    linea_actual = ""
+
+    for palabra in palabras:
+        if hDC.GetTextExtent(linea_actual + " " + palabra)[0] > max_width:
+            lineas.append(linea_actual)
+            linea_actual = palabra
+        else:
+            if linea_actual:
+                linea_actual += " " + palabra
+            else:
+                linea_actual = palabra
+
+    if linea_actual:
+        lineas.append(linea_actual)
+
+    return lineas
 
 # Función para enviar el pedido
 def enviar_pedido():
@@ -83,7 +112,7 @@ def enviar_pedido():
     
     for categoria in datos_pedido.values():
         for item, cantidad in categoria:
-            pedido.append(f"{item} ({cantidad})")
+            pedido.append(f"- {item} ({cantidad})")
             total += precios[item] * cantidad
     
     if not nombre:
@@ -94,7 +123,7 @@ def enviar_pedido():
         messagebox.showerror("Error", "Por favor seleccione al menos un artículo.")
         return
     
-    detalles_pedido = f"Nombre: {nombre}\nPedido: {', '.join(pedido)}\nTotal: ${total:.2f}"
+    detalles_pedido = f"Nombre: {nombre}\nPedido:\n" + "\n".join(pedido) + f"\nTotal: ${total:.2f}"
     
     # Mostrar los detalles del pedido y preguntar si desea imprimir
     if messagebox.askokcancel("Detalles del Pedido", detalles_pedido):
