@@ -31,6 +31,14 @@ datos_pedido = {
 }
 historial_pedidos = []
 
+# Diccionario para guardar las variables de cantidad
+variables_cantidad = {
+    "hotdog": [],
+    "hamburguesa": [],
+    "papas": [],
+    "bebida": []
+}
+
 # Función para actualizar el precio total
 def actualizar_total():
     total = 0.0
@@ -161,6 +169,9 @@ def limpiar_subtotal(categoria, etiqueta_subtotal):
     datos_pedido[categoria] = []
     actualizar_total()
     actualizar_subtotal(etiqueta_subtotal, categoria)
+    # Restablecer las variables de cantidad
+    for var in variables_cantidad[categoria]:
+        var.set("0")
 
 # Función para crear el marco de la categoría
 def crear_marco_categoria(categoria, items):
@@ -180,6 +191,7 @@ def crear_marco_categoria(categoria, items):
         etiqueta_item.pack(side='left', padx=10)
         
         var_cantidad = tk.StringVar(value="0")
+        variables_cantidad[categoria].append(var_cantidad)
         
         boton_disminuir = tk.Button(marco_item, text="-", command=lambda q=var_cantidad: disminuir_cantidad(q), bg='white', font=("Arial", 16), width=2)
         boton_disminuir.pack(side='left', padx=5)
@@ -201,6 +213,7 @@ def crear_marco_categoria(categoria, items):
     etiqueta_extra.pack(side='left', padx=10)
     
     var_cantidad_extra = tk.StringVar(value="0")
+    variables_cantidad[categoria].append(var_cantidad_extra)
     
     boton_disminuir_extra = tk.Button(marco_extra, text="-", command=lambda q=var_cantidad_extra: disminuir_cantidad(q), bg='white', font=("Arial", 16), width=2)
     boton_disminuir_extra.pack(side='left', padx=5)
@@ -227,6 +240,12 @@ def limpiar_pedido():
     global datos_pedido
     datos_pedido = {key: [] for key in datos_pedido}
     actualizar_total()
+    for categoria in variables_cantidad:
+        for var in variables_cantidad[categoria]:
+            var.set("0")
+    for marco, etiqueta in etiquetas_subtotales.items():
+        etiqueta.config(text="Subtotal: $0.00")
+    entrada_nombre.delete(0, tk.END)
     marco_principal.tkraise()
 
 # Función para ver el historial de pedidos
@@ -258,6 +277,14 @@ marco_hamburguesa = crear_marco_categoria("hamburguesa", ["Hamburguesa Clásica"
 marco_papas = crear_marco_categoria("papas", ["Papas Fritas Regulares", "Papas Fritas Rizadas", "Papas Fritas de Camote"])
 marco_bebida = crear_marco_categoria("bebida", ["Cola", "Jugo de Naranja", "Agua"])
 marco_historial = tk.Frame(root, bg='black')
+
+# Diccionario para guardar las etiquetas de subtotales
+etiquetas_subtotales = {
+    "hotdog": marco_hotdog.winfo_children()[1],
+    "hamburguesa": marco_hamburguesa.winfo_children()[1],
+    "papas": marco_papas.winfo_children()[1],
+    "bebida": marco_bebida.winfo_children()[1]
+}
 
 # Agregar una imagen en la parte superior de la ventana
 try:
